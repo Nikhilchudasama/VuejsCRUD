@@ -15,11 +15,13 @@ const app = new Vue({
     data: {
         task: {
             name: '',
-            description: ''
+            description: '',
+            image: ''
         },
+        image:'',
         errors: [],
         tasks: [],
-        update_task: {}
+        update_task: {},
 
     },
     methods: {
@@ -27,17 +29,34 @@ const app = new Vue({
             axios.get('/task')
             .then(response => {
                 this.tasks = response.data.tasks;
+                console.log(this.tasks);
+
             });
         },
         initAddTask()
         {
             $("#add_task_model").modal("show");
         },
+        onImageChange(e) {
+            let files = e.target.files || e.dataTransfer.files;
+            if (!files.length)
+                return;
+            this.createImage(files[0]);
+        },
+        createImage(file) {
+            let reader = new FileReader();
+            let vm = this;
+            reader.onload = (e) => {
+                this.image = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        },
         createTask()
         {
                 axios.post('/task', {
                     title: this.task.title,
                     description: this.task.description,
+                    image: this.image,
                 })
                 .then(response => {
                     this.reset();
@@ -57,23 +76,28 @@ const app = new Vue({
         },
         reset()
         {
-            this.task.name = '';
+            this.task.title = '';
             this.task.description = '';
+            this.image = '';
         },
         initUpdate(index)
         {
             this.errors = [];
             $("#update_task_model").modal("show");
             this.update_task = this.tasks[index];
+            this.tasks.splice(index,1);
         },
         updateTask()
         {
             axios.patch('/task/' + this.update_task.id, {
                 title: this.update_task.title,
                 description: this.update_task.description,
+                image: this.image,
             })
             .then(response => {
+                this.reset();
                 $("#update_task_model").modal("hide");
+               location.reload();
             })
             .catch(error => {
                 this.errors = [];

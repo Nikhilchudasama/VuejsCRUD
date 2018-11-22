@@ -28,6 +28,7 @@
                                 <td>@{{ index + 1 }}</td>
                                 <td>@{{ task.title }}</td>
                                 <td>@{{ task.description }}</td>
+                                <td><img v-bind:src="task.image" width="60" height="60"></td>
                                 <td>
                                     <button v-on:click="initUpdate(index)" class="btn btn-success btn-xs">Edit</button>
                                     <button v-on:click="deleteTask(index)" class="btn btn-danger btn-xs">Delete</button>
@@ -65,6 +66,11 @@
                             <textarea name="description" id="description" cols="30" rows="5" class="form-control"
                                       placeholder="Task Description" v-model="task.description"></textarea>
                         </div>
+
+                        <div class="form-group">
+                            <label for="image">Image</label>
+                            <input type="file" v-on:change="onImageChange" class="form-control">
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -95,10 +101,18 @@
                             <input type="text" placeholder="Task title" class="form-control"
                                    v-model="update_task.title">
                         </div>
+
                         <div class="form-group">
                             <label for="description">Description:</label>
                             <textarea cols="30" rows="5" class="form-control"
                                       placeholder="Task Description" v-model="update_task.description"></textarea>
+                        </div>
+
+                        <img v-bind:src="update_task.image" width="60" height="60">
+
+                        <div class="form-group">
+                            <label for="image">Image</label>
+                            <input type="file" v-on:change="onImageChange" class="form-control">
                         </div>
                     </div>
                     <div class="modal-footer">

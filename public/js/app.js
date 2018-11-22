@@ -13905,8 +13905,10 @@ var app = new Vue({
     data: {
         task: {
             name: '',
-            description: ''
+            description: '',
+            image: ''
         },
+        image: '',
         errors: [],
         tasks: [],
         update_task: {}
@@ -13918,49 +13920,38 @@ var app = new Vue({
 
             axios.get('/task').then(function (response) {
                 _this.tasks = response.data.tasks;
+                console.log(_this.tasks);
             });
         },
         initAddTask: function initAddTask() {
             $("#add_task_model").modal("show");
         },
-        createTask: function createTask() {
+        onImageChange: function onImageChange(e) {
+            var files = e.target.files || e.dataTransfer.files;
+            if (!files.length) return;
+            this.createImage(files[0]);
+        },
+        createImage: function createImage(file) {
             var _this2 = this;
+
+            var reader = new FileReader();
+            var vm = this;
+            reader.onload = function (e) {
+                _this2.image = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        },
+        createTask: function createTask() {
+            var _this3 = this;
 
             axios.post('/task', {
                 title: this.task.title,
-                description: this.task.description
+                description: this.task.description,
+                image: this.image
             }).then(function (response) {
-                _this2.reset();
-                _this2.tasks.push(response.data.task);
+                _this3.reset();
+                _this3.tasks.push(response.data.task);
                 $("#add_task_model").modal("hide");
-            }).catch(function (error) {
-                _this2.errors = [];
-                if (error.response.data.errors.title) {
-                    _this2.errors.push(error.response.data.errors.title[0]);
-                }
-
-                if (error.response.data.errors.description) {
-                    _this2.errors.push(error.response.data.errors.description[0]);
-                }
-            });
-        },
-        reset: function reset() {
-            this.task.name = '';
-            this.task.description = '';
-        },
-        initUpdate: function initUpdate(index) {
-            this.errors = [];
-            $("#update_task_model").modal("show");
-            this.update_task = this.tasks[index];
-        },
-        updateTask: function updateTask() {
-            var _this3 = this;
-
-            axios.patch('/task/' + this.update_task.id, {
-                title: this.update_task.title,
-                description: this.update_task.description
-            }).then(function (response) {
-                $("#update_task_model").modal("hide");
             }).catch(function (error) {
                 _this3.errors = [];
                 if (error.response.data.errors.title) {
@@ -13972,13 +13963,46 @@ var app = new Vue({
                 }
             });
         },
-        deleteTask: function deleteTask(index) {
+        reset: function reset() {
+            this.task.title = '';
+            this.task.description = '';
+            this.image = '';
+        },
+        initUpdate: function initUpdate(index) {
+            this.errors = [];
+            $("#update_task_model").modal("show");
+            this.update_task = this.tasks[index];
+            this.tasks.splice(index, 1);
+        },
+        updateTask: function updateTask() {
             var _this4 = this;
+
+            axios.patch('/task/' + this.update_task.id, {
+                title: this.update_task.title,
+                description: this.update_task.description,
+                image: this.image
+            }).then(function (response) {
+                _this4.reset();
+                $("#update_task_model").modal("hide");
+                location.reload();
+            }).catch(function (error) {
+                _this4.errors = [];
+                if (error.response.data.errors.title) {
+                    _this4.errors.push(error.response.data.errors.title[0]);
+                }
+
+                if (error.response.data.errors.description) {
+                    _this4.errors.push(error.response.data.errors.description[0]);
+                }
+            });
+        },
+        deleteTask: function deleteTask(index) {
+            var _this5 = this;
 
             var conf = confirm("Do you ready want to delete this task?");
             if (conf === true) {
                 axios.delete('/task/' + this.tasks[index].id).then(function (response) {
-                    _this4.tasks.splice(index, 1);
+                    _this5.tasks.splice(index, 1);
                 }).catch(function (error) {});
             }
         }

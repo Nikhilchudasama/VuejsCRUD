@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Task;
 use Illuminate\Http\Request;
+use App\Http\Resources\TaskResource;
+use App\Http\Resources\TaskResourceCollection;
 
 class TaskController extends Controller
 {
@@ -14,20 +16,11 @@ class TaskController extends Controller
      */
     public function index()
     {
-        $tasks =  Task::get();
+        $tasks =  Task::with('media')->get();
         return response()->json([
-            'tasks'    => $tasks,
+            'tasks'    => new TaskResourceCollection($tasks),
             'message' => 'Success'
         ], 200);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
     }
 
     /**
@@ -38,6 +31,7 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
+        $allowedMimeTypes = ['image/jpg','image/png','image/jpeg'];
         $this->validate($request, [
             'title'        => 'required|max:255',
             'description' => 'required',
@@ -46,32 +40,14 @@ class TaskController extends Controller
             'title'        => request('title'),
             'description' => request('description'),
         ]);
+        $task->addMediaFromBase64(request()
+                ->input('image'), $allowedMimeTypes)
+                ->toMediaCollection('image');
+
         return response()->json([
-            'task'    => $task,
+            'task'    => new TaskResource($task),
             'message' => 'Success'
         ], 200);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Task  $task
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Task $task)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Task  $task
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Task $task)
-    {
-        //
     }
 
     /**
@@ -83,6 +59,7 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
+        $allowedMimeTypes = ['image/jpg','image/png','image/jpeg'];
         $this->validate($request, [
             'title'        => 'required|max:255',
             'description' => 'required',
@@ -90,9 +67,15 @@ class TaskController extends Controller
 
         $task->title = request('title');
         $task->description = request('description');
+        if (request('image')) {
+            $task->addMediaFromBase64(request()
+                ->input('image'), $allowedMimeTypes)
+                ->toMediaCollection('image');
+        }
         $task->save();
 
         return response()->json([
+            'task' => new TaskResource($task),
             'message' => 'Task updated successfully!'
         ], 200);
     }
