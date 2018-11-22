@@ -24,7 +24,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="task of tasks">
+                            <tr v-for="(task, index) in tasks">
                                 <td>@{{ index + 1 }}</td>
                                 <td>@{{ task.title }}</td>
                                 <td>@{{ task.description }}</td>

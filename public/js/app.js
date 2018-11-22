@@ -13886,11 +13886,8 @@ module.exports = __webpack_require__(39);
 
 /***/ }),
 /* 12 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "app", function() { return app; });
 
 /**
  * First we will load all of this project's JavaScript dependencies which
@@ -13905,18 +13902,16 @@ window.Vue = __webpack_require__(36);
 
 var app = new Vue({
     el: '#takContainer',
-    data: function data() {
-        return {
-            task: {
-                name: '',
-                description: ''
-            },
-            errors: [],
-            tasks: [],
-            update_task: {}
-        };
-    },
+    data: {
+        task: {
+            name: '',
+            description: ''
+        },
+        errors: [],
+        tasks: [],
+        update_task: {}
 
+    },
     methods: {
         readTasks: function readTasks() {
             var _this = this;
@@ -13935,17 +13930,13 @@ var app = new Vue({
                 title: this.task.title,
                 description: this.task.description
             }).then(function (response) {
-
                 _this2.reset();
-                console.log(response);
-
                 _this2.tasks.push(response.data.task);
-
                 $("#add_task_model").modal("hide");
             }).catch(function (error) {
                 _this2.errors = [];
-                if (error.response.data.errors.name) {
-                    _this2.errors.push(error.response.data.errors.name[0]);
+                if (error.response.data.errors.title) {
+                    _this2.errors.push(error.response.data.errors.title[0]);
                 }
 
                 if (error.response.data.errors.description) {
@@ -13966,15 +13957,14 @@ var app = new Vue({
             var _this3 = this;
 
             axios.patch('/task/' + this.update_task.id, {
-                name: this.update_task.name,
+                title: this.update_task.title,
                 description: this.update_task.description
             }).then(function (response) {
-
                 $("#update_task_model").modal("hide");
             }).catch(function (error) {
                 _this3.errors = [];
-                if (error.response.data.errors.name) {
-                    _this3.errors.push(error.response.data.errors.name[0]);
+                if (error.response.data.errors.title) {
+                    _this3.errors.push(error.response.data.errors.title[0]);
                 }
 
                 if (error.response.data.errors.description) {
@@ -13992,6 +13982,11 @@ var app = new Vue({
                 }).catch(function (error) {});
             }
         }
+    },
+    created: function created() {
+        axios.get('/task').then(function (response) {
+            app.tasks = response.data.tasks;
+        });
     }
 });
 

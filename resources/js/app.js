@@ -10,21 +10,20 @@ require('./bootstrap');
 window.Vue = require('vue');
 // import axios from 'axios';
 
-export const app = new Vue({
+const app = new Vue({
     el: '#takContainer',
-    data() {
-        return {
-            task: {
-                name: '',
-                description: ''
-            },
-            errors: [],
-            tasks: [],
-            update_task: {}
-        }
+    data: {
+        task: {
+            name: '',
+            description: ''
+        },
+        errors: [],
+        tasks: [],
+        update_task: {}
+
     },
     methods: {
-        readTasks: function(){
+        readTasks(){
             axios.get('/task')
             .then(response => {
                 this.tasks = response.data.tasks;
@@ -41,19 +40,14 @@ export const app = new Vue({
                     description: this.task.description,
                 })
                 .then(response => {
-
                     this.reset();
-                    console.log(response);
-
                     this.tasks.push(response.data.task);
-
                     $("#add_task_model").modal("hide");
-
                 })
                 .catch(error => {
                     this.errors = [];
-                    if (error.response.data.errors.name) {
-                        this.errors.push(error.response.data.errors.name[0]);
+                    if (error.response.data.errors.title) {
+                        this.errors.push(error.response.data.errors.title[0]);
                     }
 
                     if (error.response.data.errors.description) {
@@ -75,18 +69,16 @@ export const app = new Vue({
         updateTask()
         {
             axios.patch('/task/' + this.update_task.id, {
-                name: this.update_task.name,
+                title: this.update_task.title,
                 description: this.update_task.description,
             })
             .then(response => {
-
                 $("#update_task_model").modal("hide");
-
             })
             .catch(error => {
                 this.errors = [];
-                if (error.response.data.errors.name) {
-                    this.errors.push(error.response.data.errors.name[0]);
+                if (error.response.data.errors.title) {
+                    this.errors.push(error.response.data.errors.title[0]);
                 }
 
                 if (error.response.data.errors.description) {
@@ -106,5 +98,11 @@ export const app = new Vue({
                 });
             }
         }
-    }
+    },
+    created: function () {
+        axios.get('/task')
+        .then(response => {
+            app.tasks = response.data.tasks;
+        });
+    },
 });

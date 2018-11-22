@@ -16,7 +16,7 @@ class TaskController extends Controller
     {
         $tasks =  Task::get();
         return response()->json([
-            'task'    => $tasks,
+            'tasks'    => $tasks,
             'message' => 'Success'
         ], 200);
     }
@@ -28,7 +28,6 @@ class TaskController extends Controller
      */
     public function create()
     {
-
     }
 
     /**
@@ -89,7 +88,7 @@ class TaskController extends Controller
             'description' => 'required',
         ]);
 
-        $task->name = request('title');
+        $task->title = request('title');
         $task->description = request('description');
         $task->save();
 
